@@ -1,3 +1,8 @@
+type CandidateSnapshot = {
+  value: number;
+  lastUpdated: Date;
+};
+
 type CandidateData = {
   name: string;
   className: string;
@@ -28,14 +33,14 @@ const candidates: CandidateData[] = [
   {
     name: "งดออกเสียง",
     type: "invalid",
-    className: "bg-orange-500",
+    className: "bg-orange-500 text-white",
   },
   {
     name: "ยกเลิก",
     type: "undo",
-    className: "disabled:bg-zinc-800 bg-gray-500",
+    className: "bg-zinc-800 text-white",
   },
 ];
 
 export { candidates };
-export type { CandidateData };
+export type { CandidateData, CandidateSnapshot };
