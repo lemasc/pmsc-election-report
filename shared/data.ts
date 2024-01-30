@@ -9,21 +9,21 @@ type CandidateData = {
   type: "vote" | "no-vote" | "invalid" | "undo";
 };
 
-const candidates: CandidateData[] = [
+const candidates = [
   {
-    name: "เณวิสาข์ ไทรสาขา",
+    name: "ปรัชญาณี ผลแก้ว",
     type: "vote",
-    className: "bg-[#E34C51] text-white",
+    className: "bg-[#c3454e] text-white",
   },
   {
-    name: "บุญญาดา จันทรสิทธิ์",
+    name: "ณัฐณิชา วิธูรัตน์",
     type: "vote",
-    className: "bg-[#00B3FF] text-white",
+    className: "bg-[#c35dc0] text-white",
   },
   {
-    name: "ธัญชนก ภัคกรณ์กุล",
+    name: "ธีระเศรษฐ์ พิมลวิรัชกุล",
     type: "vote",
-    className: "bg-[#B975F6] text-white",
+    className: "bg-[#23518d] text-white",
   },
   {
     name: "ไม่ประสงค์ลงคะแนน",
@@ -33,14 +33,14 @@ const candidates: CandidateData[] = [
   {
     name: "งดออกเสียง",
     type: "invalid",
-    className: "bg-orange-500 text-white",
+    className: "bg-black text-white",
   },
   {
     name: "ยกเลิก",
     type: "undo",
     className: "bg-zinc-800 text-white",
   },
-];
+] satisfies CandidateData[];
 
 export { candidates };
 export type { CandidateData, CandidateSnapshot };

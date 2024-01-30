@@ -1,10 +1,10 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 
-import { Bai_Jamjuree } from "@next/font/google";
+import { IBM_Plex_Sans_Thai } from "@next/font/google";
 
-const font = Bai_Jamjuree({
-  weight: ["400", "700"],
+const font = IBM_Plex_Sans_Thai({
+  weight: ["300", "700"],
   subsets: ["latin", "thai"],
   variable: "--font-bai",
 });

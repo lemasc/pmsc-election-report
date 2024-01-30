@@ -8,7 +8,9 @@ import { db } from "../shared/firebase";
 import { useEffect, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
 
-const candidates = data.slice(0, 3);
+const candidates = data.slice(0, -1).filter((v) => v.type !== "invalid");
+const invalid = data.findIndex((v) => v.type === "invalid");
+
 const Footer = () => {
   const [data, setData] = useState<CandidateSnapshot[]>([]);
   useEffect(
@@ -28,45 +30,94 @@ const Footer = () => {
   );
 
   return (
-    <div className="absolute bottom-0 flex w-full" style={{ zoom: 1.5 }}>
-      <div className="flex-grow grid grid-cols-3">
-        {candidates.map((v, i) => (
-          <div
-            className={` flex flex-wrap gap-4 py-4 px-6 ${v.className} `}
-            key={i}
-          >
-            <div className="relative w-[120px]">
-              <Image
-                unoptimized
-                width={120}
-                height={120}
-                src={`/candidates/${i + 1}.jpg`}
-                className="rounded shadow-md absolute bottom-0 z-10"
-                alt={v.name}
-              />
+    <>
+      <div className="w-[600px] absolute h-full min-h-screen top-0 left-0 flex flex-col bg-white bg-opacity-70 pt-6 text-xl z-10">
+        <div className="h-[200px] flex flex-row p-6 gap-4 items-center ">
+          <div>
+            <Image src="/logo_wpm.png" width={80} height={80} alt="Logo WPM" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <b className="text-3xl pr-4">การเลือกตั้งประธานนักเรียน</b>
+            <span className="text-xl">ประจำปีการศึกษา 2567</span>
+          </div>
+        </div>
+        <div className="text-center text-xl py-4 font-bold rounded-t-lg bg-gradient-to-r from-pink-400 to-yellow-300">
+          ผลการนับคะแนนอย่างไม่เป็นทางการ
+        </div>
+        <div className="flex flex-col flex-grow">
+          {candidates.map((v, i) => (
+            <div
+              className={`flex flex-col relative flex-wrap ${v.className} `}
+              key={i}
+            >
+              <div className="flex gap-6 items-center pt-6 pb-3 px-6">
+                <b className="text-7xl">{v.type === "vote" ? i + 1 : "X"}</b>
+                <div className="flex-grow flex flex-col">
+                  <span className="font-bold text-3xl">
+                    {v.name.split(" ")[0]}
+                  </span>
+                  <span className="text-xl">{v.name.split(" ")[1]}</span>
+                </div>
+              </div>
+
+              {v.type === "vote" && (
+                <div className="absolute p-4 bottom-0 right-0">
+                  <Image
+                    width={120}
+                    height={120}
+                    src={`/candidates/${i + 1}.jpg`}
+                    className="rounded shadow-md border-[3px] border-white"
+                    alt={v.name}
+                  />
+                </div>
+              )}
+              <div>
+                <div
+                  className={`flex gap-2 py-3 px-6 ${
+                    v.type === "invalid"
+                      ? "bg-white bg-opacity-[0.15]"
+                      : "bg-black bg-opacity-10"
+                  } text-xl`}
+                >
+                  <span className="opacity-90">{data?.[i]?.value || 0}</span>
+                  <span>คะแนน</span>
+                </div>
+              </div>
             </div>
-            <div className={`flex flex-col gap-0.5 pb-1`}>
-              <b className="text-lg text-white">
-                {i + 1}. {v.name}
-              </b>
-              <span className="text-gray-200">
-                {data?.[i]?.value || 0} คะแนน
-              </span>
+          ))}
+          <div className="flex flex-grow flex-col gap-2 px-4 pt-6 bg-gradient-to-b from-white to-gray-300">
+            <div className="flex gap-4">
+              <b className="text-blue-500 flex-grow">บัตรดี</b>
+              <span>{data[invalid]?.value ?? 0} ใบ</span>
+            </div>
+            <div className="flex gap-4">
+              <b className="text-red-500 flex-grow">บัตรเสีย</b>
+              <span>{data[invalid]?.value ?? 0} ใบ</span>
+            </div>
+            <div className="flex gap-4">
+              <b className="flex-grow">รวมผู้ใชิสิทธิ์ลงคะแนน</b>
+              <span>{data[invalid]?.value ?? 0} ใบ</span>
             </div>
           </div>
-        ))}
+        </div>
       </div>
-    </div>
+      <div className="absolute top-0 left-0">
+        <Image
+          src="/bg2.jpg"
+          width={1920}
+          height={1080}
+          alt="Background"
+          className="object-cover h-[250px] w-[600px] object-[100%_50%]"
+        />
+      </div>
+    </>
   );
 };
 export default function IndexPage() {
   const { query } = useRouter();
   return (
-    <div className="bg-green-500 w-[1920px] h-[1080px]">
-      <div style={{ zoom: 0.5 }}>
-        <Image src={banner} alt="Banner" width={1920} height={1080} />
-      </div>
-      {!query.hideFooter && <Footer />}
+    <div className="bg-[#00ff01] h-full min-h-screen">
+      <Footer />
     </div>
   );
 }
