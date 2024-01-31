@@ -1,32 +1,24 @@
-import banner from "../public/banner.png";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { candidates as data, CandidateSnapshot } from "@/shared/data";
-import { useCollection } from "@lemasc/swr-firestore";
 
-import { db } from "../shared/firebase";
-import { useEffect, useState } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { useEffect, useMemo, useState } from "react";
+import { useStorage } from "@/liveblocks.config";
 
 const candidates = data.slice(0, -1).filter((v) => v.type !== "invalid");
 const invalid = data.findIndex((v) => v.type === "invalid");
+console.log(invalid);
 
 const Footer = () => {
-  const [data, setData] = useState<CandidateSnapshot[]>([]);
-  useEffect(
+  const votes = useStorage((v) => v.votes);
+  const validVotes = useMemo(
     () =>
-      onSnapshot(collection(db, "votes"), ({ docs }) => {
-        setData(
-          docs.reduce((data, doc) => {
-            const docId = parseInt(doc.id);
-            if (!isNaN(docId)) {
-              data[docId] = doc.data() as CandidateSnapshot;
-            }
-            return data;
-          }, [] as CandidateSnapshot[])
-        );
-      }),
-    []
+      candidates.reduce((a, v, i) => a + (votes?.get(i.toString()) || 0), 0),
+    [votes]
+  );
+  const invalidVotes = useMemo(
+    () => votes?.get(invalid.toString()) || 0,
+    [votes]
   );
 
   return (
@@ -79,7 +71,9 @@ const Footer = () => {
                       : "bg-black bg-opacity-10"
                   } text-xl`}
                 >
-                  <span className="opacity-90">{data?.[i]?.value || 0}</span>
+                  <span className="opacity-90">
+                    {votes?.get(i.toString()) || 0}
+                  </span>
                   <span>คะแนน</span>
                 </div>
               </div>
@@ -88,15 +82,15 @@ const Footer = () => {
           <div className="flex flex-grow flex-col gap-2 px-4 pt-6 bg-gradient-to-b from-white to-gray-300">
             <div className="flex gap-4">
               <b className="text-blue-500 flex-grow">บัตรดี</b>
-              <span>{data[invalid]?.value ?? 0} ใบ</span>
+              <span>{validVotes} ใบ</span>
             </div>
             <div className="flex gap-4">
               <b className="text-red-500 flex-grow">บัตรเสีย</b>
-              <span>{data[invalid]?.value ?? 0} ใบ</span>
+              <span>{invalidVotes} ใบ</span>
             </div>
             <div className="flex gap-4">
-              <b className="flex-grow">รวมผู้ใชิสิทธิ์ลงคะแนน</b>
-              <span>{data[invalid]?.value ?? 0} ใบ</span>
+              <b className="flex-grow">รวมผู้ใช้สิทธิ์ลงคะแนน</b>
+              <span>{validVotes + invalidVotes} ใบ</span>
             </div>
           </div>
         </div>
@@ -114,7 +108,6 @@ const Footer = () => {
   );
 };
 export default function IndexPage() {
-  const { query } = useRouter();
   return (
     <div className="bg-[#00ff01] h-full min-h-screen">
       <Footer />

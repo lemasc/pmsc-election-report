@@ -1,3 +1,4 @@
+import { useHistory, useMutation, useStorage } from "@/liveblocks.config";
 import { CandidateData, candidates, CandidateSnapshot } from "@/shared/data";
 import { setVote, undoVote } from "@/shared/report";
 import { useDocument, isDocumentValid } from "@lemasc/swr-firestore";
@@ -32,31 +33,20 @@ const ActionButton = ({
 };
 
 const VoteButton = ({
-  type,
+  value,
   index,
   ...props
 }: ActionButtonProps & {
-  index: number;
-  type: Omit<CandidateData["type"], "undo">;
+  value: number;
+  index: string;
 }) => {
-  const docId = useMemo(
-    () => (type === "vote" ? index.toString() : type),
-    [type, index]
+  const onClick = useMutation(
+    ({ storage }) => {
+      const map = storage.get("votes");
+      map.set(index, value + 1);
+    },
+    [index, value]
   );
-  const { data } = useDocument<CandidateSnapshot>(`votes/${docId}`, {
-    listen: true,
-  });
-  const value = useMemo(
-    () => (data && isDocumentValid(data) && data.value) || 0,
-    [data]
-  );
-  const onClick = useCallback(async () => {
-    try {
-      await setVote(docId as string, value + 1);
-    } catch (err) {
-      console.error(err);
-    }
-  }, [docId, value]);
   return (
     <ActionButton {...props} onClick={onClick}>
       <b>{value} คะแนน</b>
@@ -64,23 +54,21 @@ const VoteButton = ({
   );
 };
 
-const UndoButton = ({ data }: { data: CandidateData }) => {
+const UndoButton = ({ data, loaded }: { data: CandidateData, loaded: boolean }) => {
+  const history = useHistory();
   const onClick = useCallback(() => {
-    try {
-      undoVote();
-    } catch (err) {
-      console.error(err);
-    }
-  }, []);
+    if (loaded) history.undo();
+  }, [loaded, history]);
   return (
     <ActionButton
       onClick={onClick}
-      header={data.name}
+      header={loaded ? data.name : "กำลังโหลด..."}
       className={data.className}
     />
   );
 };
 export default function ReportPage() {
+  const votes = useStorage((v) => v.votes);
   return (
     <>
       <Head>
@@ -90,15 +78,15 @@ export default function ReportPage() {
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 flex-grow">
           {candidates.map((v, i) =>
             v.type === "undo" ? (
-              <UndoButton key={i} data={v} />
+              <UndoButton key={i} data={v} loaded={!!votes} />
             ) : (
               <VoteButton
                 key={i}
                 className={v.className}
                 header={v.type === "vote" ? `หมายเลข ${i + 1}` : v.name}
                 desc={v.type === "vote" && v.name}
-                index={i}
-                type={v.type}
+                index={i.toString()}
+                value={votes?.get(i.toString()) ?? 0}
               />
             )
           )}

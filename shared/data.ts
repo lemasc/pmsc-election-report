@@ -31,7 +31,7 @@ const candidates = [
     className: "bg-gray-300",
   },
   {
-    name: "งดออกเสียง",
+    name: "บัตรเสีย",
     type: "invalid",
     className: "bg-black text-white",
   },
